@@ -40,8 +40,8 @@ const DataEntryPage = ({ onDataSubmit }: DataEntryPageProps) => {
       projects: [
         {
           title: "",
-          description: "",
-          image: "",
+          description: "", // Will be filled from GitHub data when available
+          image: "", // Will be filled from GitHub data when available
           github: "",
         }
       ],
@@ -51,7 +51,7 @@ const DataEntryPage = ({ onDataSubmit }: DataEntryPageProps) => {
           url: "",
         }
       ],
-    },
+    } as PortfolioData, // Type assertion to resolve type errors with optional fields
   });
 
   // State for GitHub username
@@ -480,7 +480,9 @@ const DataEntryPage = ({ onDataSubmit }: DataEntryPageProps) => {
                         name={`projects.${index}.image`}
                         render={({ field }) => (
                           <FormItem className="mb-4">
-                            <FormLabel className="text-gray-700 dark:text-gray-300">Project Image *</FormLabel>
+                            <FormLabel className="text-gray-700 dark:text-gray-300">
+                              Project Image {field.value && field.value.includes('githubassets') ? '(from GitHub)' : ''}
+                            </FormLabel>
                             <div className="space-y-4">
                               {field.value && (
                                 <div className="relative w-full h-40 rounded-lg overflow-hidden border-2 border-primary-500">
@@ -561,7 +563,9 @@ const DataEntryPage = ({ onDataSubmit }: DataEntryPageProps) => {
                         name={`projects.${index}.description`}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-gray-700 dark:text-gray-300">Project Description *</FormLabel>
+                            <FormLabel className="text-gray-700 dark:text-gray-300">
+                              Project Description {field.value && field.value.includes('Technologies:') ? '(from GitHub)' : ''}
+                            </FormLabel>
                             <FormControl>
                               <Textarea 
                                 placeholder="Describe your project, technologies used, and your role..." 

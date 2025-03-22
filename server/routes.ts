@@ -143,14 +143,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const reposData = await reposResponse.json();
       
       // Extract and transform the repository data
-      const projects = reposData
-        .filter((repo: any) => !repo.fork && !repo.private) // Only include original public repos
-        .map((repo: any) => ({
-          title: repo.name,
-          description: repo.description || `A project repository by ${username}`,
-          image: `https://opengraph.githubassets.com/1/${username}/${repo.name}`,
-          github: repo.html_url,
-        }));
+      const projects = await Promise.all(
+        reposData
+          .filter((repo: any) => !repo.fork && !repo.private) // Only include original public repos
+          .map(async (repo: any) => {
+            // Get more detailed repository info including topics
+            const detailResponse = await fetch(`https://api.github.com/repos/${username}/${repo.name}`);
+            const repoDetail = detailResponse.ok ? await detailResponse.json() : null;
+            
+            // Generate a richer description using topics if available
+            let description = repo.description || '';
+            if (repoDetail && repoDetail.topics && repoDetail.topics.length > 0) {
+              if (description) {
+                description += '\n\nTechnologies: ' + repoDetail.topics.join(', ');
+              } else {
+                description = 'Technologies: ' + repoDetail.topics.join(', ');
+              }
+            }
+            
+            if (!description) {
+              description = `A project repository by ${username}`;
+            }
+            
+            return {
+              title: repo.name.replace(/-/g, ' ').replace(/_/g, ' '),
+              description: description,
+              image: `https://opengraph.githubassets.com/1/${username}/${repo.name}`,
+              github: repo.html_url,
+            };
+          })
+      );
       
       return res.status(200).json({ 
         githubProfile: userData,

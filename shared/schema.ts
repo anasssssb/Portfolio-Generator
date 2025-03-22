@@ -11,8 +11,8 @@ export const socialMediaSchema = z.object({
 // Project schema
 export const projectSchema = z.object({
   title: z.string(),
-  description: z.string(),
-  image: z.string().url(),
+  description: z.string().optional(),
+  image: z.string().url().optional(),
   github: z.string().url(),
   order: z.number().optional(),
 });
