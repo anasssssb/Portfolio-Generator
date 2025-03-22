@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import { z } from "zod";
@@ -7,11 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { PortfolioData } from "@/types";
+import { PortfolioData, Project } from "@/types";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2 } from "lucide-react";
+import { useGitHubProjects } from "@/hooks/useGitHubProjects";
+import { Plus, Trash2, RefreshCw, Github } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface DataEntryPageProps {
@@ -53,16 +54,50 @@ const DataEntryPage = ({ onDataSubmit }: DataEntryPageProps) => {
     },
   });
 
+  // State for GitHub username
+  const [githubUsername, setGithubUsername] = useState("");
+  const [isLoadingProjects, setIsLoadingProjects] = useState(false);
+  
+  // GitHub projects hook
+  const { data: githubData, isLoading, error, refetch } = useGitHubProjects(githubUsername);
+  
   // Field arrays for dynamic fields
   const { fields: skillFields, append: appendSkill, remove: removeSkill } = useFieldArray({
     control: form.control,
     name: "skills" as "projects", // Type assertion to fix type error
   });
 
-  const { fields: projectFields, append: appendProject, remove: removeProject } = useFieldArray({
+  const { fields: projectFields, append: appendProject, remove: removeProject, replace: replaceProjects } = useFieldArray({
     control: form.control,
     name: "projects",
   });
+  
+  // Update projects when GitHub data is fetched
+  useEffect(() => {
+    if (githubData?.projects && githubData.projects.length > 0) {
+      replaceProjects(githubData.projects);
+      toast({
+        title: "Success",
+        description: `Fetched ${githubData.projects.length} projects from GitHub!`,
+      });
+      setIsLoadingProjects(false);
+    }
+  }, [githubData, replaceProjects, toast]);
+  
+  // Handle GitHub username fetch
+  const fetchGitHubProjects = async () => {
+    if (!githubUsername) {
+      toast({
+        title: "Error",
+        description: "Please enter a GitHub username",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsLoadingProjects(true);
+    refetch();
+  };
 
   const { fields: socialMediaFields, append: appendSocialMedia, remove: removeSocialMedia } = useFieldArray({
     control: form.control,
@@ -329,7 +364,60 @@ const DataEntryPage = ({ onDataSubmit }: DataEntryPageProps) => {
                   <span className="bg-primary-500 text-white rounded-full w-6 h-6 inline-flex items-center justify-center mr-2">3</span>
                   Projects
                 </h2>
-                <div id="projectsContainer">
+                
+                {/* GitHub username input */}
+                <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 mb-4 bg-gray-50 dark:bg-gray-800">
+                  <h3 className="text-lg font-medium text-gray-800 dark:text-white mb-3 flex items-center">
+                    <Github className="h-5 w-5 mr-2 text-primary-600" /> 
+                    Fetch Projects from GitHub
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">
+                    Enter your GitHub username to automatically import your public repositories as projects.
+                  </p>
+                  
+                  <div className="flex items-end gap-4">
+                    <div className="flex-1">
+                      <label htmlFor="githubUsername" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        GitHub Username
+                      </label>
+                      <input
+                        id="githubUsername"
+                        type="text"
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white"
+                        placeholder="octocat"
+                        value={githubUsername}
+                        onChange={(e) => setGithubUsername(e.target.value)}
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="default"
+                      onClick={fetchGitHubProjects}
+                      disabled={isLoadingProjects || !githubUsername}
+                      className="flex-shrink-0 flex items-center"
+                    >
+                      {isLoadingProjects ? (
+                        <>
+                          <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                          Fetching...
+                        </>
+                      ) : (
+                        <>
+                          <RefreshCw className="h-4 w-4 mr-2" />
+                          Fetch Projects
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  
+                  {error && (
+                    <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                      Failed to fetch GitHub projects. Please check the username and try again.
+                    </p>
+                  )}
+                </div>
+                
+                <div id="projectsContainer" className={isLoadingProjects ? "opacity-50 pointer-events-none" : ""}>
                   {projectFields.map((field, index) => (
                     <div 
                       key={field.id} 

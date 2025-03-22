@@ -115,6 +115,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Fetch GitHub repositories endpoint
+  app.get("/api/github/:username", async (req: Request, res: Response) => {
+    try {
+      const { username } = req.params;
+      
+      if (!username) {
+        return res.status(400).json({ message: "GitHub username is required" });
+      }
+      
+      // Fetch user profile first
+      const userResponse = await fetch(`https://api.github.com/users/${username}`);
+      
+      if (!userResponse.ok) {
+        return res.status(404).json({ message: "GitHub user not found" });
+      }
+      
+      const userData = await userResponse.json();
+      
+      // Then fetch repositories
+      const reposResponse = await fetch(`https://api.github.com/users/${username}/repos?sort=updated&per_page=10`);
+      
+      if (!reposResponse.ok) {
+        return res.status(500).json({ message: "Failed to fetch repositories" });
+      }
+      
+      const reposData = await reposResponse.json();
+      
+      // Extract and transform the repository data
+      const projects = reposData
+        .filter((repo: any) => !repo.fork && !repo.private) // Only include original public repos
+        .map((repo: any) => ({
+          title: repo.name,
+          description: repo.description || `A project repository by ${username}`,
+          image: `https://opengraph.githubassets.com/1/${username}/${repo.name}`,
+          github: repo.html_url,
+        }));
+      
+      return res.status(200).json({ 
+        githubProfile: userData,
+        projects
+      });
+    } catch (error) {
+      console.error("Error fetching GitHub data:", error);
+      return res.status(500).json({ message: "Error fetching GitHub data" });
+    }
+  });
+
   // File upload endpoint
   app.post("/api/upload", upload.single('profilePicture'), (req: Request, res: Response) => {
     try {
