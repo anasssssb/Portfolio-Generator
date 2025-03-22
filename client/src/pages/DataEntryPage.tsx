@@ -690,16 +690,25 @@ const DataEntryPage = ({ onDataSubmit }: DataEntryPageProps) => {
               </div>
               
               {/* Submit Button */}
-              <div className="flex justify-center">
-                <motion.button
-                  type="submit"
-                  className="px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  disabled={createPortfolio.isPending}
-                >
-                  {createPortfolio.isPending ? "Generating..." : "Generate Portfolio"}
-                </motion.button>
+              <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-6 mb-4 bg-gray-50 dark:bg-gray-800">
+                <h2 className="text-xl font-semibold text-gray-800 dark:text-white flex items-center mb-4">
+                  <span className="bg-primary-500 text-white rounded-full w-6 h-6 inline-flex items-center justify-center mr-2">5</span>
+                  Generate Your Portfolio
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  Once you've completed the form, click the button below to generate your personal portfolio website.
+                </p>
+                <div className="flex justify-center">
+                  <motion.button
+                    type="submit"
+                    className="px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    disabled={createPortfolio.isPending}
+                  >
+                    {createPortfolio.isPending ? "Generating..." : "Generate Portfolio"}
+                  </motion.button>
+                </div>
               </div>
             </form>
           </Form>
