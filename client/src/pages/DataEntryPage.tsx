@@ -24,6 +24,7 @@ type DataEntryFormValues = z.infer<typeof dataEntryFormSchema>;
 
 const DataEntryPage = ({ onDataSubmit }: DataEntryPageProps) => {
   const { toast } = useToast();
+  const [isUploading, setIsUploading] = useState(false);
 
   // Initialize form with default values
   const form = useForm<DataEntryFormValues>({
@@ -55,7 +56,7 @@ const DataEntryPage = ({ onDataSubmit }: DataEntryPageProps) => {
   // Field arrays for dynamic fields
   const { fields: skillFields, append: appendSkill, remove: removeSkill } = useFieldArray({
     control: form.control,
-    name: "skills",
+    name: "skills" as "projects", // Type assertion to fix type error
   });
 
   const { fields: projectFields, append: appendProject, remove: removeProject } = useFieldArray({
@@ -180,14 +181,77 @@ const DataEntryPage = ({ onDataSubmit }: DataEntryPageProps) => {
                   name="profilePicture"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700 dark:text-gray-300">Profile Picture URL *</FormLabel>
-                      <FormControl>
+                      <FormLabel className="text-gray-700 dark:text-gray-300">Profile Picture *</FormLabel>
+                      <div className="space-y-4">
+                        {field.value && (
+                          <div className="relative w-32 h-32 rounded-full overflow-hidden border-2 border-primary-500">
+                            <img 
+                              src={field.value} 
+                              alt="Profile preview" 
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        )}
+                        <div className="flex items-center gap-4">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                              const fileInput = document.createElement('input');
+                              fileInput.type = 'file';
+                              fileInput.accept = 'image/*';
+                              fileInput.onchange = async (e) => {
+                                const target = e.target as HTMLInputElement;
+                                if (!target.files?.length) return;
+                                
+                                const file = target.files[0];
+                                const formData = new FormData();
+                                formData.append('profilePicture', file);
+                                
+                                try {
+                                  setIsUploading(true);
+                                  const response = await fetch('/api/upload', {
+                                    method: 'POST',
+                                    body: formData,
+                                  });
+                                  
+                                  if (!response.ok) {
+                                    throw new Error('Failed to upload image');
+                                  }
+                                  
+                                  const data = await response.json();
+                                  field.onChange(data.url);
+                                } catch (error) {
+                                  console.error('Error uploading image:', error);
+                                  toast({
+                                    title: "Upload Error",
+                                    description: "Failed to upload image. Please try again.",
+                                    variant: "destructive"
+                                  });
+                                } finally {
+                                  setIsUploading(false);
+                                }
+                              };
+                              fileInput.click();
+                            }}
+                          >
+                            {isUploading ? "Uploading..." : "Upload Image"}
+                          </Button>
+                          {field.value && (
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              onClick={() => field.onChange("")}
+                            >
+                              Remove
+                            </Button>
+                          )}
+                        </div>
                         <Input 
-                          placeholder="https://example.com/your-image.jpg" 
-                          {...field} 
-                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white"
+                          type="hidden"
+                          {...field}
                         />
-                      </FormControl>
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -251,7 +315,7 @@ const DataEntryPage = ({ onDataSubmit }: DataEntryPageProps) => {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    onClick={() => appendSkill("")}
+                    onClick={() => appendSkill("" as any)}
                     className="mt-2 text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 font-medium text-sm"
                   >
                     <Plus className="h-4 w-4 mr-1" /> Add Skill
@@ -328,14 +392,77 @@ const DataEntryPage = ({ onDataSubmit }: DataEntryPageProps) => {
                         name={`projects.${index}.image`}
                         render={({ field }) => (
                           <FormItem className="mb-4">
-                            <FormLabel className="text-gray-700 dark:text-gray-300">Project Image URL *</FormLabel>
-                            <FormControl>
+                            <FormLabel className="text-gray-700 dark:text-gray-300">Project Image *</FormLabel>
+                            <div className="space-y-4">
+                              {field.value && (
+                                <div className="relative w-full h-40 rounded-lg overflow-hidden border-2 border-primary-500">
+                                  <img 
+                                    src={field.value} 
+                                    alt={`Project ${index + 1} preview`} 
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                              )}
+                              <div className="flex items-center gap-4">
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  onClick={() => {
+                                    const fileInput = document.createElement('input');
+                                    fileInput.type = 'file';
+                                    fileInput.accept = 'image/*';
+                                    fileInput.onchange = async (e) => {
+                                      const target = e.target as HTMLInputElement;
+                                      if (!target.files?.length) return;
+                                      
+                                      const file = target.files[0];
+                                      const formData = new FormData();
+                                      formData.append('profilePicture', file);
+                                      
+                                      try {
+                                        setIsUploading(true);
+                                        const response = await fetch('/api/upload', {
+                                          method: 'POST',
+                                          body: formData,
+                                        });
+                                        
+                                        if (!response.ok) {
+                                          throw new Error('Failed to upload image');
+                                        }
+                                        
+                                        const data = await response.json();
+                                        field.onChange(data.url);
+                                      } catch (error) {
+                                        console.error('Error uploading image:', error);
+                                        toast({
+                                          title: "Upload Error",
+                                          description: "Failed to upload image. Please try again.",
+                                          variant: "destructive"
+                                        });
+                                      } finally {
+                                        setIsUploading(false);
+                                      }
+                                    };
+                                    fileInput.click();
+                                  }}
+                                >
+                                  {isUploading ? "Uploading..." : "Upload Image"}
+                                </Button>
+                                {field.value && (
+                                  <Button
+                                    type="button"
+                                    variant="destructive"
+                                    onClick={() => field.onChange("")}
+                                  >
+                                    Remove
+                                  </Button>
+                                )}
+                              </div>
                               <Input 
-                                placeholder="https://example.com/project-image.jpg" 
-                                {...field} 
-                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white"
+                                type="hidden"
+                                {...field}
                               />
-                            </FormControl>
+                            </div>
                             <FormMessage />
                           </FormItem>
                         )}
