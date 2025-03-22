@@ -116,8 +116,17 @@ const DataEntryPage = ({ onDataSubmit }: DataEntryPageProps) => {
         description: "Your portfolio has been generated!",
       });
       
-      // Pass the portfolio data and ID to parent component
-      onDataSubmit(form.getValues(), data.id);
+      // Pass the processed portfolio data and ID to parent component
+      const formData = form.getValues();
+      const processedData = {
+        ...formData,
+        projects: formData.projects.map(project => ({
+          ...project,
+          description: project.description || "",
+          image: project.image || "",
+        }))
+      };
+      onDataSubmit(processedData as PortfolioData, data.id);
     },
     onError: (error) => {
       toast({
@@ -129,7 +138,18 @@ const DataEntryPage = ({ onDataSubmit }: DataEntryPageProps) => {
   });
 
   function onSubmit(data: DataEntryFormValues) {
-    createPortfolio.mutate(data);
+    // Ensure project descriptions and images are properly handled
+    const processedData = {
+      ...data,
+      projects: data.projects.map(project => ({
+        ...project,
+        // Provide default empty values for optional fields if they don't exist
+        description: project.description || "",
+        image: project.image || "",
+      }))
+    };
+    
+    createPortfolio.mutate(processedData as PortfolioData);
   }
 
   return (
@@ -586,10 +606,8 @@ const DataEntryPage = ({ onDataSubmit }: DataEntryPageProps) => {
                   variant="outline"
                   onClick={() => appendProject({
                     title: "",
-                    description: "",
-                    image: "",
-                    github: "",
-                  })}
+                    github: "", // Only title and github are required
+                  } as any)}
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-600 bg-primary-50 hover:bg-primary-100 dark:bg-gray-700 dark:text-primary-400 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
                 >
                   <Plus className="h-4 w-4 mr-2" /> Add Another Project
