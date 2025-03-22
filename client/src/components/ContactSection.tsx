@@ -56,10 +56,11 @@ type ExternalFormConfig = z.infer<typeof externalFormSchema>;
 const ContactSection = ({ portfolioId }: ContactSectionProps) => {
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [externalFormOpen, setExternalFormOpen] = useState(false);
+  // Default with the provided Google Form ID
   const [externalConfig, setExternalConfig] = useState<ExternalFormConfig>({
     useExternalService: false,
     serviceType: "google",
-    formId: "",
+    formId: "1FAIpQLSeJJkl2STsfAD_TzsY_taK4SmT4Ykfu35TmSuRagQdjZIBxlA",
     formUrl: "",
   });
 
@@ -514,14 +515,26 @@ const ContactSection = ({ portfolioId }: ContactSectionProps) => {
                   This contact form can be linked to external services like Google Forms for better data management. 
                   Click the settings icon <Settings className="inline h-3 w-3" /> to configure external services.
                 </p>
+                <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                  <strong>Pre-configured Form:</strong> A Google Form is already configured (ID: 1FAIpQLSeJJkl2STsfAD_TzsY_taK4SmT4Ykfu35TmSuRagQdjZIBxlA).
+                  Simply toggle "Use external form service" in settings to enable it.
+                </p>
                 <div className="mt-3 text-sm">
                   <a 
                     href="https://support.google.com/docs/answer/6281888" 
                     target="_blank" 
                     rel="noopener noreferrer" 
-                    className="text-blue-600 hover:text-blue-800 flex items-center max-w-fit"
+                    className="text-sm text-blue-600 hover:text-blue-800 flex items-center max-w-fit"
                   >
                     Learn about Google Forms <ExternalLink className="ml-1 h-3 w-3" />
+                  </a>
+                  <a 
+                    href="https://docs.google.com/forms/d/e/1FAIpQLSeJJkl2STsfAD_TzsY_taK4SmT4Ykfu35TmSuRagQdjZIBxlA/viewform" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="mt-2 text-sm text-blue-600 hover:text-blue-800 flex items-center max-w-fit"
+                  >
+                    View Configured Google Form <ExternalLink className="ml-1 h-3 w-3" />
                   </a>
                 </div>
               </div>
