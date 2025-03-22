@@ -510,31 +510,18 @@ const ContactSection = ({ portfolioId }: ContactSectionProps) => {
                 <Info className="h-5 w-5 text-blue-500" />
               </div>
               <div>
-                <h3 className="text-md font-medium text-gray-900 dark:text-white">About Contact Forms</h3>
+                <h3 className="text-md font-medium text-gray-900 dark:text-white">Contact Me</h3>
                 <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                  This contact form can be linked to external services like Google Forms for better data management. 
-                  Click the settings icon <Settings className="inline h-3 w-3" /> to configure external services.
+                  Click the link below to enter your query in a Google Form.
                 </p>
-                <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                  <strong>Pre-configured Form:</strong> A Google Form is already configured (ID: 1FAIpQLSeJJkl2STsfAD_TzsY_taK4SmT4Ykfu35TmSuRagQdjZIBxlA).
-                  Simply toggle "Use external form service" in settings to enable it.
-                </p>
-                <div className="mt-3 text-sm">
-                  <a 
-                    href="https://support.google.com/docs/answer/6281888" 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="text-sm text-blue-600 hover:text-blue-800 flex items-center max-w-fit"
-                  >
-                    Learn about Google Forms <ExternalLink className="ml-1 h-3 w-3" />
-                  </a>
+                <div className="mt-3">
                   <a 
                     href="https://docs.google.com/forms/d/e/1FAIpQLSeJJkl2STsfAD_TzsY_taK4SmT4Ykfu35TmSuRagQdjZIBxlA/viewform" 
                     target="_blank" 
                     rel="noopener noreferrer" 
-                    className="mt-2 text-sm text-blue-600 hover:text-blue-800 flex items-center max-w-fit"
+                    className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all duration-200"
                   >
-                    View Configured Google Form <ExternalLink className="ml-1 h-3 w-3" />
+                    Open Google Form <ExternalLink className="ml-2 h-4 w-4" />
                   </a>
                 </div>
               </div>
