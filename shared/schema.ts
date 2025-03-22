@@ -8,11 +8,26 @@ export const socialMediaSchema = z.object({
   url: z.string().url(),
 });
 
+// Custom URL validator that accepts both local paths and full URLs
+const relativeOrAbsoluteUrl = z.string().refine(val => {
+  // Accept relative paths that start with / (local uploads)
+  if (val.startsWith('/')) {
+    return true;
+  }
+  // Otherwise, try to validate as a URL
+  try {
+    new URL(val);
+    return true;
+  } catch {
+    return false;
+  }
+}, { message: 'Must be a valid URL or a local path starting with "/"' });
+
 // Project schema
 export const projectSchema = z.object({
   title: z.string(),
   description: z.string().optional(),
-  image: z.string().url().optional(),
+  image: relativeOrAbsoluteUrl.optional(),
   github: z.string().url(),
   order: z.number().optional(),
 });
@@ -22,7 +37,7 @@ export const portfolioSchema = z.object({
   fullName: z.string(),
   title: z.string(),
   shortBio: z.string(),
-  profilePicture: z.string().url(),
+  profilePicture: relativeOrAbsoluteUrl,
   detailedBio: z.string(),
   skills: z.array(z.string()),
   projects: z.array(projectSchema),
